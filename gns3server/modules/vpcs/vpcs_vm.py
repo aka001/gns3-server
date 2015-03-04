@@ -229,6 +229,7 @@ class VPCSVM(BaseVM):
                                                                               creationflags=flags)
                 log.info("VPCS instance {} started PID={}".format(self.name, self._process.pid))
                 self._started = True
+                self.status = "started"
             except (OSError, subprocess.SubprocessError) as e:
                 vpcs_stdout = self.read_vpcs_stdout()
                 log.error("Could not start VPCS {}: {}\n{}".format(self.vpcs_path, e, vpcs_stdout))
@@ -251,6 +252,7 @@ class VPCSVM(BaseVM):
 
         self._process = None
         self._started = False
+        self.status = "stoped"
 
     @asyncio.coroutine
     def reload(self):

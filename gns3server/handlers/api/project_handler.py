@@ -15,10 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import asyncio
+import json
+
 from ...web.route import Route
 from ...schemas.project import PROJECT_OBJECT_SCHEMA, PROJECT_CREATE_SCHEMA, PROJECT_UPDATE_SCHEMA
 from ...modules.project_manager import ProjectManager
 from ...modules import MODULES
+
+import logging
+log = logging.getLogger()
 
 
 class ProjectHandler:
@@ -143,3 +149,43 @@ class ProjectHandler:
         yield from project.delete()
         pm.remove_project(project.id)
         response.set_status(204)
+
+    @classmethod
+    @Route.get(
+        r"/projects/{project_id}/notifications",
+        description="Receive notifications about the projects",
+        parameters={
+            "project_id": "The UUID of the project",
+        },
+        status_codes={
+            200: "End of stream",
+            404: "The project doesn't exist"
+        })
+    def notification(request, response):
+
+        pm = ProjectManager.instance()
+        project = pm.get_project(request.match_info["project_id"])
+
+        response.content_type = "application/json"
+        response.set_status(200)
+        response.enable_chunked_encoding()
+        # Very important: do not send a content lenght otherwise QT close the connection but curl can consume the Feed
+        response.content_length = None
+
+        response.start(request)
+        queue = project.get_listen_queue()
+        response.write("{\"action\": \"ping\"}\n".encode("utf-8"))
+        while True:
+            try:
+                msg = yield from asyncio.wait_for(queue.get(), 5)
+                if hasattr(msg, "__json__"):
+                    msg = json.dumps(msg.__json__())
+                else:
+                    msg = json.dumps(msg)
+                log.debug("Send notification {}", msg)
+                response.write(("{}\n".format(msg)).encode("utf-8"))
+            except asyncio.futures.CancelledError as e:
+                break
+            except asyncio.futures.TimeoutError as e:
+                response.write("{\"action\": \"ping\"}\n".encode("utf-8"))
+        project.stop_listen_queue(queue)

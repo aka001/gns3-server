@@ -45,6 +45,7 @@ class BaseVM:
         self._project = project
         self._manager = manager
         self._console = console
+        self._status = "initialized"
 
         if self._console is not None:
             self._console = self._manager.port_manager.reserve_tcp_port(self._console)
@@ -61,6 +62,18 @@ class BaseVM:
     def __del__(self):
 
         self.close()
+
+    @property
+    def status(self):
+        """Return current VM status"""
+
+        return self._status
+
+    @status.setter
+    def status(self, status):
+
+        self._status = status
+        self._project.emit(self)
 
     @property
     def project(self):
