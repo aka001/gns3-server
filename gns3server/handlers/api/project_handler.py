@@ -182,7 +182,7 @@ class ProjectHandler:
                     msg = json.dumps({"action": action, "event": msg.__json__()})
                 else:
                     msg = json.dumps({"action": action, "event": msg})
-                log.debug("Send notification {}", msg)
+                log.debug("Send notification: %s", msg)
                 response.write(("{}\n".format(msg)).encode("utf-8"))
             except asyncio.futures.CancelledError as e:
                 break
