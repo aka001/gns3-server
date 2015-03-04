@@ -73,7 +73,7 @@ class BaseVM:
     def status(self, status):
 
         self._status = status
-        self._project.emit(self)
+        self._project.emit("vm.{}".format(status), self)
 
     @property
     def project(self):

@@ -342,14 +342,15 @@ class Project:
         from ..modules import MODULES
         return MODULES
 
-    def emit(self, event):
+    def emit(self, action, event):
         """
         Send an event to all the client listens for notifications
 
+        :param action: Action happened
         :param event: Event sended to the client
         """
         for listener in self._listeners:
-            listener.put_nowait(event)
+            listener.put_nowait((action, event, ))
 
     def get_listen_queue(self):
         """Get a queue where you receive all the events related to the

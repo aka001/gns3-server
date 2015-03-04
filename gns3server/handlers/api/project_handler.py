@@ -177,11 +177,11 @@ class ProjectHandler:
         response.write("{\"action\": \"ping\"}\n".encode("utf-8"))
         while True:
             try:
-                msg = yield from asyncio.wait_for(queue.get(), 5)
+                (action, msg) = yield from asyncio.wait_for(queue.get(), 5)
                 if hasattr(msg, "__json__"):
-                    msg = json.dumps(msg.__json__())
+                    msg = json.dumps({"action": action, "event": msg.__json__()})
                 else:
-                    msg = json.dumps(msg)
+                    msg = json.dumps({"action": action, "event": msg})
                 log.debug("Send notification {}", msg)
                 response.write(("{}\n".format(msg)).encode("utf-8"))
             except asyncio.futures.CancelledError as e:
