@@ -104,6 +104,7 @@ class VPCSVM(BaseVM):
 
         return {"name": self.name,
                 "vm_id": self.id,
+                "status": self._status,
                 "console": self._console,
                 "project_id": self.project.id,
                 "startup_script": self.startup_script,
@@ -252,7 +253,7 @@ class VPCSVM(BaseVM):
 
         self._process = None
         self._started = False
-        self.status = "stoped"
+        self.status = "stopped"
 
     @asyncio.coroutine
     def reload(self):

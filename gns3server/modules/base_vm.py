@@ -45,7 +45,7 @@ class BaseVM:
         self._project = project
         self._manager = manager
         self._console = console
-        self._status = "initialized"
+        self._status = "stopped"
 
         if self._console is not None:
             self._console = self._manager.port_manager.reserve_tcp_port(self._console)
