@@ -77,3 +77,16 @@ def wait_for_process_termination(process, timeout=10):
         yield from asyncio.sleep(0.1)
         timeout -= 0.1
     raise asyncio.TimeoutError()
+
+
+@asyncio.coroutine
+def _check_process(process, termination_callback):
+    if not sys._called_from_test:
+        returncode = yield from process.wait()
+        termination_callback(returncode)
+
+
+def monitor_process(process, termination_callback):
+    """Call termination_callback when process die"""
+
+    asyncio.async(_check_process(process, termination_callback))
