@@ -22,6 +22,7 @@ This test suite check /project endpoint
 import uuid
 from unittest.mock import patch
 from tests.utils import asyncio_patch
+from gns3server.handlers.api.project_handler import ProjectHandler
 
 
 def test_create_project_with_path(server, tmpdir):
@@ -130,6 +131,16 @@ def test_close_project(server, project):
         response = server.post("/projects/{project_id}/close".format(project_id=project.id), example=True)
         assert response.status == 204
         assert mock.called
+
+
+def test_close_project_two_client_connected(server, project):
+
+    ProjectHandler._notifications_listening = 2
+
+    with asyncio_patch("gns3server.modules.project.Project.close", return_value=True) as mock:
+        response = server.post("/projects/{project_id}/close".format(project_id=project.id), example=True)
+        assert response.status == 204
+        assert not mock.called
 
 
 def test_close_project_invalid_uuid(server):

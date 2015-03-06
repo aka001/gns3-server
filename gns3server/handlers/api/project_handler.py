@@ -29,6 +29,9 @@ log = logging.getLogger()
 
 class ProjectHandler:
 
+    # How many clients has subcribe to notifications
+    _notifications_listening = 0
+
     @classmethod
     @Route.post(
         r"/projects",
@@ -127,8 +130,9 @@ class ProjectHandler:
 
         pm = ProjectManager.instance()
         project = pm.get_project(request.match_info["project_id"])
-        yield from project.close()
-        pm.remove_project(project.id)
+        if ProjectHandler._notifications_listening == 0:
+            yield from project.close()
+            pm.remove_project(project.id)
         response.set_status(204)
 
     @classmethod
@@ -174,6 +178,7 @@ class ProjectHandler:
 
         response.start(request)
         queue = project.get_listen_queue()
+        ProjectHandler._notifications_listening += 1
         response.write("{\"action\": \"ping\"}\n".encode("utf-8"))
         while True:
             try:
@@ -189,3 +194,4 @@ class ProjectHandler:
             except asyncio.futures.TimeoutError as e:
                 response.write("{\"action\": \"ping\"}\n".encode("utf-8"))
         project.stop_listen_queue(queue)
+        ProjectHandler._notifications_listening -= 1
