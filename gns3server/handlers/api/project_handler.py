@@ -184,9 +184,9 @@ class ProjectHandler:
             try:
                 (action, msg) = yield from asyncio.wait_for(queue.get(), 5)
                 if hasattr(msg, "__json__"):
-                    msg = json.dumps({"action": action, "event": msg.__json__()})
+                    msg = json.dumps({"action": action, "event": msg.__json__()}, sort_keys=True)
                 else:
-                    msg = json.dumps({"action": action, "event": msg})
+                    msg = json.dumps({"action": action, "event": msg}, sort_keys=True)
                 log.debug("Send notification: %s", msg)
                 response.write(("{}\n".format(msg)).encode("utf-8"))
             except asyncio.futures.CancelledError as e:
