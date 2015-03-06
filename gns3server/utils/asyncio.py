@@ -18,6 +18,7 @@
 
 import asyncio
 import shutil
+import sys
 
 
 @asyncio.coroutine
@@ -81,7 +82,7 @@ def wait_for_process_termination(process, timeout=10):
 
 @asyncio.coroutine
 def _check_process(process, termination_callback):
-    if not sys._called_from_test:
+    if not hasattr(sys, "_called_from_test") or not sys._called_from_test:
         returncode = yield from process.wait()
         termination_callback(returncode)
 
