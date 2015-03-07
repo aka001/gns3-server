@@ -104,7 +104,7 @@ class VPCSVM(BaseVM):
 
         return {"name": self.name,
                 "vm_id": self.id,
-                "status": self._status,
+                "status": self.status,
                 "console": self._console,
                 "project_id": self.project.id,
                 "startup_script": self.startup_script,

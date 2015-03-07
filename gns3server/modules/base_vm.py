@@ -45,7 +45,7 @@ class BaseVM:
         self._project = project
         self._manager = manager
         self._console = console
-        self._status = "stopped"
+        self._vm_status = "stopped"
 
         if self._console is not None:
             self._console = self._manager.port_manager.reserve_tcp_port(self._console)
@@ -67,12 +67,12 @@ class BaseVM:
     def status(self):
         """Return current VM status"""
 
-        return self._status
+        return self._vm_status
 
     @status.setter
     def status(self, status):
 
-        self._status = status
+        self._vm_status = status
         self._project.emit("vm.{}".format(status), self)
 
     @property
